@@ -10,14 +10,21 @@ var expectedFormat = "2006-01-02"
 
 // parseTime validates and parses a given date string.
 func parseTime(target string) time.Time {
-	panic("NOT IMPLEMENTED")
+ parsedTime, err :=  time.Parse(expectedFormat,target)
+
+ if err != nil || time.Now().After(parsedTime) {
+		log.Fatal("invalid date")
+ }
+
+ return parsedTime
 }
 
 // calcSleeps returns the number of sleeps until the target.
 func calcSleeps(target time.Time) float64 {
-	panic("NOT IMPLEMENTED")
+	return time.Until(target).Hours() /24
 }
 
+//Test example: go run main.go -bday 2025-03-02
 func main() {
 	bday := flag.String("bday", "", "Your next bday in YYYY-MM-DD format")
 	flag.Parse()
