@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -16,17 +17,32 @@ var operators = map[string]func(x, y float64) float64{
 }
 
 // parseOperand parses a string to a float64
-func parseOperand(op string) float64 {
-	parsedOp, _ := strconv.ParseFloat(op, 64)
-	return parsedOp
+func parseOperand(op string) (float64, error) {
+	parsedOp, err := strconv.ParseFloat(op, 64)
+	return parsedOp, err
 }
 
 // calculate returns the result of a 2 operand mathematical expression
 func calculate(expr string) float64 {
 	ops := strings.Fields(expr)
-	left := parseOperand(ops[0])
-	right := parseOperand(ops[2])
-	f := operators[ops[1]]
+	if len(ops) != 3 {
+		log.Fatal(fmt.Sprintf("Invalid expression, expected 3 args, found %d", len(ops)))
+	}
+	left, err := parseOperand(ops[0])
+	if err != nil {
+		log.Fatal(fmt.Sprintf( "Error while converting value to float64: %s", ops[0]))
+	}
+	right, err := parseOperand(ops[2])
+	if err != nil {
+		log.Fatal(fmt.Sprintf( "Error while converting value to float64: %s", ops[2]))
+	}
+
+	f, ok := operators[ops[1]]
+
+	if !ok {
+		log.Fatal(fmt.Sprintf("Could not select a operation, wrong oparator: %s", ops[1] ))
+	}
+
 	result := f(left, right)
 	return result
 }
