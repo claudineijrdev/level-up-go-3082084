@@ -16,6 +16,7 @@ type coffeeShop struct {
 
 	orderCoffee  chan struct{}
 	finishCoffee chan struct{}
+	closeShop    chan struct{}
 }
 
 // registerOrder ensures that the order made by the baristas is counted
@@ -26,6 +27,9 @@ func (p *coffeeShop) registerOrder() {
 // barista is the resource producer of the coffee shop
 func (p *coffeeShop) barista(name string) {
 	for {
+		if p.orderCount == maxOrderCount {
+			p.closeShop <- struct{}{}
+		}
 		select {
 		case <-p.orderCoffee:
 			p.registerOrder()
@@ -43,6 +47,8 @@ func (p *coffeeShop) customer(name string) {
 			log.Printf("%s orders a coffee!", name)
 			<-p.finishCoffee
 			log.Printf("%s enjoys a coffee!\n", name)
+		case <-p.closeShop:
+			log.Printf("%s leaves from the shop!\n", name)
 		}
 	}
 }
@@ -51,9 +57,11 @@ func main() {
 	log.Println("Welcome to the Level Up Go coffee shop!")
 	orderCoffee := make(chan struct{}, baristaCount)
 	finishCoffee := make(chan struct{}, baristaCount)
+	closeShop := make(chan struct{})
 	p := coffeeShop{
 		orderCoffee:  orderCoffee,
 		finishCoffee: finishCoffee,
+		closeShop:    closeShop,
 	}
 	for i := 0; i < baristaCount; i++ {
 		go p.barista(fmt.Sprint("Barista-", i))
@@ -61,5 +69,6 @@ func main() {
 	for i := 0; i < customerCount; i++ {
 		go p.customer(fmt.Sprint("Customer-", i))
 	}
+	<-closeShop
 	log.Println("The Level Up Go coffee shop has closed! Bye!")
 }
