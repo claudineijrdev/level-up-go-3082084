@@ -42,7 +42,7 @@ func (a *auctioneer) runAuction(bids <-chan bid, open chan<- bool) {
 		var bidOwner bid
 		a.openBinds(open)
 		log.Printf("Opening bids for %s!\n", item)
-		for i := 0; i < bidderCount; i++ {
+		for range bidderCount {
 			bid := <-bids
 			if bid.amount > maxBid {
 				bidOwner = bid
