@@ -37,7 +37,6 @@ type auctioneer struct {
 // Change the signature of this function as required
 func (a *auctioneer) runAuction(bids <-chan bid, open chan<- bool) {
 	for _, item := range items {
-
 		maxBid := 0
 		var bidOwner bid
 		a.openBinds(open)
